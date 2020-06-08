@@ -30,6 +30,12 @@ class MainWindow(QMainWindow):
         self.dateModel=TableModel(item=self.displayCompatTime(Time.localtime()))
         self.setViews(views=['dateView'],models=['dateModel'])
         self.tick=QSound("app/sounds/tiktok.wav",parent=self)
+        self.hourFMT.toggled.connect(self.hourFMTChange)
+        if self.hourFMT.isChecked():
+            self.dayStage.show()
+        else:
+            self.dayStage.hide()
+
         self.mb=Menubar(self)            
         #QLCDNumber.
         args=QCoreApplication.instance().arguments()
@@ -39,6 +45,12 @@ class MainWindow(QMainWindow):
                     self.iterWorkerPrep() 
         self.setWindowTitle("Qt5 HashTok")
         self.show()
+
+    def hourFMTChange(self,state):
+        if state:
+            self.dayStage.show()
+        else:
+            self.dayStage.hide()
 
     def killWorkers(self):
         for i in ['timeWorker','iterworker']:
@@ -74,7 +86,16 @@ class MainWindow(QMainWindow):
     
     def timeParse(self,time):
         self.playSound()
-        self.hour.display(time.tm_hour)
+        if not self.hourFMT.isChecked(): 
+            self.hour.display(time.tm_hour)
+        else:
+            tm=time.tm_hour-12
+            if tm >= 0:
+                self.hour.display(tm)
+                self.dayStage.setText("PM")
+            else:
+                self.hour.display(time.tm_hour)
+                self.dayStage.setText("AM")
         self.minute.display(time.tm_min)
         self.second.display(time.tm_sec)
         progress=(time.tm_hour*60*60)+(time.tm_min*60)+time.tm_sec
