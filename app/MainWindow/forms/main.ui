@@ -119,6 +119,13 @@
                  </property>
                 </widget>
                </item>
+               <item row="4" column="0">
+                <widget class="QCheckBox" name="mute">
+                 <property name="text">
+                  <string>Mute</string>
+                 </property>
+                </widget>
+               </item>
               </layout>
              </widget>
             </item>

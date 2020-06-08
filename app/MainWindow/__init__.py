@@ -9,8 +9,11 @@ import time as Time
 from .workers.IterWorker import IterWorker
 from ..common.TableModel import TableModel
 from .Menubar import Menubar
+from ..config.config import config
+
 class MainWindow(QMainWindow):
     def __init__(self):
+        self.conf=config()
         super(MainWindow,self).__init__()
         uic.loadUi("app/MainWindow/forms/main.ui",self)
         
@@ -30,7 +33,12 @@ class MainWindow(QMainWindow):
         self.dateModel=TableModel(item=self.displayCompatTime(Time.localtime()))
         self.setViews(views=['dateView'],models=['dateModel'])
         self.tick=QSound("app/sounds/tiktok.wav",parent=self)
+
+        self.mute.setChecked(self.conf.mute)
+        self.hourFMT.setChecked(self.conf.hour12FMT)
         self.hourFMT.toggled.connect(self.hourFMTChange)
+        self.mute.toggled.connect(self.muteChanged)
+
         if self.hourFMT.isChecked():
             self.dayStage.show()
         else:
@@ -46,11 +54,17 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Qt5 HashTok")
         self.show()
 
+    def muteChanged(self,state):
+        self.conf.mute=state
+        self.conf.save()
+
     def hourFMTChange(self,state):
         if state:
             self.dayStage.show()
         else:
             self.dayStage.hide()
+        self.conf.hour12FMT=state
+        self.conf.save()
 
     def killWorkers(self):
         for i in ['timeWorker','iterworker']:
@@ -82,7 +96,8 @@ class MainWindow(QMainWindow):
         return timeDict
 
     def playSound(self):
-        self.tick.play()
+        if not self.mute.isChecked():
+            self.tick.play()
     
     def timeParse(self,time):
         self.playSound()
